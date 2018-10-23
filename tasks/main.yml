@@ -1,0 +1,34 @@
+---
+- name: "Make sure Java is installed"
+  package:
+    name: openjdk-8-jdk
+    state: present
+
+- name: "Create IntelliJ IDEA home directory"
+  file:
+    path: "{{ idea_home }}"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+
+- name: "Download IntelliJ IDEA"
+  unarchive:
+    src: "{{ idea_download_link }}"
+    dest: "{{ idea_home }}"
+    remote_src: no
+    owner: root
+    group: root
+    mode: 0755
+    list_files: yes
+  register: idea_files
+
+- name: "Get downloaded directory"
+  set_fact:
+    idea_directory: "{{ idea_files.files[0].split('/')[0] }}"
+
+- name: "Select IntelliJ"
+  alternatives:
+    name: 'idea'
+    link: /usr/bin/idea
+    path: "{{ idea_home }}/{{ idea_directory }}/bin/idea.sh"
